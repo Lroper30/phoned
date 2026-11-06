@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AP World: Empire Quest</title>
+  <style>
+    :root {
+      --bg: #0c111b;
+      --panel: #151e2c;
+      --panel2: #1b2738;
+      --line: #2a394d;
+      --text: #f4f1e9;
+      --muted: #9ba9b9;
+      --gold: #f4bd59;
+      --gold2: #ffdb8a;
+      --green: #61d6a4;
+      --red: #ff7777;
+      --blue: #79b9ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: radial-gradient(ellipse at 80% 0%, #1b2c40 0%, transparent 42%), var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { max-width: 1180px; margin: 0 auto; padding: 0 24px 50px; }
+    .topbar {
+      height: 84px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #263447;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px;
+      background: #2a251e; border: 1px solid #80643a; color: var(--gold); font-size: 24px;
+    }
+    .brand b { letter-spacing: 1px; }
+    .brand small { display: block; color: var(--muted); font-size: 10px; letter-spacing: 1.2px; }
+    .top-stats { display: flex; gap: 12px; }
+    .stat {
+      background: #141e2b; border: 1px solid var(--line); border-radius: 10px; min-width: 76px;
+      padding: 8px 13px; text-align: center;
+    }
+    .stat span { display: block; color: var(--muted); font-size: 10px; letter-spacing: 1px; }
+    .stat b { font-size: 17px; }
+    .screen { display: none; padding-top: 32px; }
+    .screen.active { display: block; }
+    .hero {
+      display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: center;
+      background: linear-gradient(110deg, #182536, #1a2633 60%, #273243);
+      border: 1px solid #344255; border-radius: 22px; padding: 40px 48px; position: relative; overflow: hidden;
+    }
+    .eyebrow {
+      font-size: 11px; letter-spacing: 1.7px; color: var(--gold); text-transform: uppercase; font-weight: 700;
+    }
+    .hero h1 { font-size: clamp(38px, 5vw, 62px); margin: 15px 0; line-height: 1.04; }
+    .hero h1 em { color: var(--gold); font-style: normal; }
+    .hero p { color: #b7c2ce; max-width: 470px; line-height: 1.7; font-size: 15px; }
+    .primary, .secondary { border: 0; border-radius: 10px; padding: 13px 19px; font-weight: 800; letter-spacing: .7px; }
+    .primary { background: var(--gold); color: #21190d; box-shadow: 0 5px 0 #a7782e; }
+    .secondary { background: #26364a; color: var(--text); border: 1px solid #40536b; }
+    .primary.big { margin-top: 13px; padding: 16px 23px; }
+    .hero-note { font-size: 10px; color: #8190a0; margin-top: 18px; }
+    .hero-art { height: 280px; position: relative; display: grid; place-items: center; }
+    .sun { position: absolute; width: 190px; height: 190px; border-radius: 50%; background: linear-gradient(140deg, #f7cb78, #b66d43); box-shadow: 0 0 90px #e6a24b55; }
+    .orbit { position: absolute; border: 1px solid #f3c77a66; border-radius: 50%; }
+    .orbit-one { width: 340px; height: 125px; transform: rotate(-25deg); }
+    .orbit-two { width: 300px; height: 200px; transform: rotate(48deg); }
+    .castle { font-size: 118px; transform: translateY(-10px); }
+    .flag { position: absolute; right: 13%; top: 15%; font-size: 34px; color: var(--gold); }
+    .art-label { position: absolute; bottom: 0; right: 0; text-align: right; font-size: 11px; letter-spacing: 3px; color: #c6b18a; }
+    .art-label b { font-size: 19px; color: var(--gold); }
+    .section-heading { display: flex; justify-content: space-between; align-items: end; margin: 36px 0 16px; }
+    .section-heading h2 { font-size: clamp(24px, 3vw, 32px); margin: 7px 0 0; }
+    .tag { font-size: 10px; border: 1px solid #655237; color: var(--gold); padding: 7px 10px; border-radius: 20px; }
+    .mode-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+    .mode-card {
+      text-align: left; background: linear-gradient(145deg,#182333,#141d2a); border: 1px solid var(--line);
+      border-radius: 15px; padding: 20px; color: var(--text); min-height: 170px;
+    }
+    .mode-icon { display: block; font-size: 27px; margin-bottom: 12px; }
+    .mode-name { display: block; font-weight: 800; font-size: 16px; }
+    .mode-desc { display: block; color: var(--muted); font-size: 12px; line-height: 1.5; margin: 6px 0 15px; }
+    .mode-link { font-size: 10px; letter-spacing: 1px; color: var(--gold); }
+    .progress-panel {
+      margin-top: 22px; border: 1px solid var(--line); background: #141e2b; border-radius: 15px;
+      padding: 22px 25px; display: flex; align-items: center; justify-content: space-between; gap: 25px;
+    }
+    .progress-panel h3 { margin: 5px 0; font-size: 18px; }
+    .progress-panel p { margin: 0; color: var(--muted); font-size: 12px; }
+    .progress-right { width: 38%; min-width: 210px; }
+    .progress-right strong { font-size: 14px; color: var(--gold); }
+    .progress-track, .game-progress { height: 7px; background: #2a394a; border-radius: 20px; overflow: hidden; margin: 9px 0; }
+    .progress-track div, .game-progress div { height: 100%; width: 0; background: linear-gradient(90deg,#bd873b,#ffda86); border-radius: 20px; }
+    .study-section, .multiplayer-section { margin-top: 42px; }
+    .study-actions, .room-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .section-note { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .study-set-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-top: 18px; }
+    .study-set-card {
+      border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg,#182333,#141d2a);
+      padding: 19px; min-width: 0;
+    }
+    .study-set-card h3 { margin: 8px 0; font-size: 19px; overflow-wrap: anywhere; }
+    .study-set-card > p { min-height: 38px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .set-card-top { display: flex; justify-content: space-between; align-items: center; }
+    .set-card-meta { margin: 15px 0; color: var(--gold); font-size: 10px; letter-spacing: 1px; }
+    .set-card-actions { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+    .set-card-actions .primary, .set-card-actions .secondary { padding: 10px 12px; font-size: 10px; }
+    .delete-set, .icon-close {
+      border: 1px solid var(--line); background: #202e40; color: var(--muted); border-radius: 8px; width: 36px; height: 36px; font-size: 20px;
+    }
+    .multiplayer-section { border: 1px solid var(--line); border-radius: 17px; padding: 24px; background: #141e2b; }
+    .multiplayer-section h2 { margin: 7px 0; font-size: 27px; }
+    .room-controls { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin: 20px 0; }
+    .room-controls label, .editor-dialog label { display: grid; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .room-controls input, .room-controls select, .editor-dialog input, .editor-dialog textarea {
+      min-width: 175px; border: 1px solid #40536b; border-radius: 8px; background: #0f1723; color: var(--text); padding: 11px 12px;
+    }
+    .room-status { margin: 12px 0; color: var(--muted); font-size: 13px; }
+    .room-status.error { color: #ffaaaa; }
+    .room-lobby { margin-top: 17px; padding: 18px; border: 1px solid #34465c; background: #182536; border-radius: 12px; }
+    .room-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .room-heading h3 { margin: 6px 0; font-size: 22px; }
+    .player-list { list-style: none; padding: 0; margin: 0 0 16px; }
+    .player-list li { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .player-list li b { margin-left: auto; color: var(--gold); }
+    .host-badge { color: var(--gold); font-size: 9px; letter-spacing: .8px; }
+    .game-top { display: grid; grid-template-columns: 120px 1fr 90px; align-items: center; gap: 15px; margin-bottom: 20px; }
+    .back-btn { background: transparent; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); padding: 10px; }
+    .game-title h2 { font-size: 29px; margin: 4px 0; }
+    .game-score { text-align: right; }
+    .game-score b { font-size: 21px; color: var(--gold); }
+    .game-progress { margin: 0 0 24px; }
+    .question-card, .tool-card { max-width: 790px; margin: 0 auto; background: linear-gradient(145deg,#192638,#141e2b); border: 1px solid #35475c; border-radius: 19px; padding: 30px; }
+    .question-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; letter-spacing: 1px; }
+    .question-card h3 { margin: 20px 0 22px; font-size: 26px; line-height: 1.3; }
+    .answers { display: grid; gap: 10px; }
+    .answer { width: 100%; text-align: left; background: #202e40; border: 1px solid #35475c; color: var(--text); border-radius: 10px; padding: 15px 17px; display: flex; gap: 12px; align-items: center; }
+    .answer .letter { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; background: #34465c; color: var(--gold); font-size: 12px; }
+    .answer.correct { border-color: var(--green); background: #16382f; }
+    .answer.wrong { border-color: var(--red); background: #3b252b; }
+    .answer:disabled { opacity: 1; cursor: default; }
+    .feedback { display: none; margin-top: 17px; padding: 14px; border-radius: 10px; background: #203b35; border: 1px solid #3d806c; color: #d4f8e9; font-size: 13px; }
+    .feedback.show { display: block; }
+    .feedback.bad { background: #3b292d; border-color: #85515a; color: #ffe0e0; }
+    .next-row { display: flex; justify-content: flex-end; margin-top: 18px; }
+    .next-row button:disabled { opacity: .4; cursor: not-allowed; }
+    .flashcard { min-height: 250px; display: grid; place-items: center; text-align: center; background: linear-gradient(145deg,#27384d,#192638); border: 1px solid #52647b; border-radius: 17px; padding: 28px; cursor: pointer; }
+    .flashcard .face-label { font-size: 10px; letter-spacing: 2px; color: var(--gold); }
+    .flashcard h3 { font-size: 30px; max-width: 600px; }
+    .flashcard p { color: #c4cfda; line-height: 1.6; max-width: 570px; }
+    .flash-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 10px; }
+    .hint { color: var(--muted); font-size: 11px; }
+    .result-card {
+      max-width: 700px; margin: 25px auto; background: linear-gradient(145deg,#1d2b3d,#141e2b); border: 1px solid #3a4d62; border-radius: 20px; padding: 35px; text-align: center;
+    }
+    .result-medal { font-size: 55px; margin-bottom: 12px; }
+    .result-card h2 { font-size: 34px; margin: 9px 0; }
+    .result-card > p { color: var(--muted); }
+    .result-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 28px 0; }
+    .result-stats strong { display: block; font-size: 34px; color: var(--gold); }
+    .result-stats span { display: block; color: var(--muted); font-size: 12px; letter-spacing: 1px; }
+    .result-actions { display: flex; justify-content: center; gap: 12px; }
+    #toast {
+      position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(12px); opacity: 0;
+      background: #1c2a38; border: 1px solid #496684; color: var(--text); border-radius: 999px; padding: 10px 14px; transition: .2s;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    dialog { border: 1px solid #40536b; border-radius: 17px; background: #151e2c; color: var(--text); padding: 24px; width: min(560px, calc(100% - 28px)); }
+    dialog::backdrop { background: rgba(5, 8, 13, 0.7); }
+    dialog form { display: grid; gap: 14px; }
+    .dialog-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .dialog-heading h2 { margin: 6px 0; font-size: 25px; }
+    .editor-dialog input, .editor-dialog textarea { width: 100%; min-width: 0; }
+    .editor-dialog textarea { resize: vertical; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+    .question-list { display: grid; gap: 9px; max-height: 48vh; overflow: auto; }
+    .question-list-item { padding: 13px; border: 1px solid var(--line); border-radius: 10px; background: #1b2738; }
+    .question-list-item h3 { margin: 0 0 7px; font-size: 13px; }
+    .question-list-item p { margin: 0 0 10px; color: var(--green); font-size: 12px; }
+    .question-list-item .room-actions { justify-content: flex-end; }
+    .question-list-item button { padding: 8px 11px; font-size: 10px; }
+    footer { text-align: center; color: var(--muted); padding-top: 34px; }
+    @media (max-width: 760px) {
+      .study-set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { grid-template-columns: 1fr; }
+      .room-controls { flex-direction: column; align-items: stretch; }
+      .result-stats { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .app-shell { padding: 0 12px 30px; }
+      .study-set-grid { grid-template-columns: 1fr; }
+      .mode-grid { grid-template-columns: 1fr; }
+      .section-heading { flex-wrap: wrap; }
+      .room-controls label, .room-controls input, .room-controls select { width: 100%; }
+      .game-top { grid-template-columns: 1fr; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Empire Quest home">
+        <span class="brand-mark">⚔</span>
+        <span>EMPIRE <b>QUEST</b><small>AP WORLD HISTORY · UNIT 3</small></span>
+      </a>
+      <div class="top-stats">
+        <div class="stat"><span>⭐ XP</span><b id="xp">0</b></div>
+        <div class="stat"><span>🔥 STREAK</span><b id="streak">0</b></div>
+        <div class="stat"><span>🏆 BEST</span><b id="best">0</b></div>
+      </div>
+    </header>
+
+    <main>
+      <section id="home-screen" class="screen active">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">1450–1750 · LAND-BASED EMPIRES</div>
+            <h1>Build your empire.<br><em>Master Unit 3.</em></h1>
+            <p>Train your history knowledge, defeat the quiz bosses, and unlock the title of <strong>History Legend</strong>.</p>
+            <button class="primary big" id="start-btn">START QUEST <span>→</span></button>
+            <div class="hero-note">Single-player works locally · AI and online rooms need setup</div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="sun"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+            <div class="castle">🏰</div><div class="flag">⚑</div>
+            <div class="art-label">THE AGE OF<br><b>EMPIRES</b></div>
+          </div>
+        </div>
+
+        <div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR TRAINING</span><h2>Your mission board</h2></div><span class="tag">6 GAME MODES</span></div>
+        <div class="mode-grid">
+          <button class="mode-card" data-mode="campaign"><span class="mode-icon">🗺️</span><span class="mode-name">Empire Campaign</span><span class="mode-desc">Travel through all 7 study topics.</span><span class="mode-link">PLAY CAMPAIGN →</span></button>
+          <button class="mode-card" data-mode="quiz"><span class="mode-icon">⚡</span><span class="mode-name">Quick Battle</span><span class="mode-desc">Answer random questions and earn XP.</span><span class="mode-link">BATTLE →</span></button>
+          <button class="mode-card" data-mode="flashcards"><span class="mode-icon">🃏</span><span class="mode-name">Flashcard Forge</span><span class="mode-desc">Flip cards to lock in key facts.</span><span class="mode-link">STUDY →</span></button>
+          <button class="mode-card" data-mode="timeline"><span class="mode-icon">⌛</span><span class="mode-name">Timeline Rush</span><span class="mode-desc">Put major events in the right order.</span><span class="mode-link">RACE →</span></button>
+          <button class="mode-card" data-mode="match"><span class="mode-icon">🔗</span><span class="mode-name">Match the Terms</span><span class="mode-desc">Connect people, terms, and meanings.</span><span class="mode-link">MATCH →</span></button>
+          <button class="mode-card" data-mode="boss"><span class="mode-icon">👑</span><span class="mode-name">Final Boss</span><span class="mode-desc">A mixed challenge across the whole unit.</span><span class="mode-link">CHALLENGE →</span></button>
+        </div>
+
+        <div class="progress-panel">
+          <div><span class="eyebrow">YOUR PROGRESS</span><h3>Empire knowledge level</h3><p id="rank-text">Recruit · Keep training to rise through the ranks.</p></div>
+          <div class="progress-right"><strong id="progress-xp">0 XP</strong><div class="progress-track"><div id="progress-fill"></div></div><small id="next-rank">100 XP to Scholar</small></div>
+        </div>
+
+        <section class="study-section" aria-labelledby="study-heading">
+          <div class="section-heading"><div><span class="eyebrow">YOUR LIBRARY</span><h2 id="study-heading">Study sets</h2></div><div class="study-actions"><button class="secondary" id="import-set-btn">✨ MAKE FROM A GUIDE</button><button class="primary" id="create-set-btn">＋ CREATE A SET</button></div></div>
+          <p class="section-note">Your original Unit 3 questions stay here. Make your own sets, add questions, or turn a study guide into a practice set.</p>
+          <div id="study-sets" class="study-set-grid"></div>
+        </section>
+
+        <section class="multiplayer-section" aria-labelledby="multiplayer-heading">
+          <div><span class="eyebrow">PLAY TOGETHER</span><h2 id="multiplayer-heading">Multiplayer arena</h2><p class="section-note">Single device local room support is included in the one-file build. For online rooms, use your own hosted WebSocket server URL if desired.</p></div>
+          <div class="room-controls">
+            <label>Your name<input id="player-name" maxlength="20" placeholder="History hero"></label>
+            <label>Study set<select id="room-set"></select></label>
+            <button class="primary" id="host-room">HOST A GAME</button>
+            <label>Room code<input id="join-code" maxlength="6" placeholder="ABC123" autocomplete="off"></label>
+            <button class="secondary" id="join-room">JOIN ROOM</button>
+          </div>
+          <div id="room-status" class="room-status" role="status">No room connected.</div>
+          <div id="room-lobby" class="room-lobby" hidden></div>
+        </section>
+      </section>
+
+      <section id="game-screen" class="screen">
+        <div class="game-top">
+          <button class="back-btn" id="back-home">← HOME</button>
+          <div class="game-title"><span class="eyebrow" id="game-kicker">TRAINING MODE</span><h2 id="game-heading">Quick Battle</h2></div>
+          <div class="game-score"><span>⭐ XP</span><b id="game-xp">0</b></div>
+        </div>
+        <div class="game-progress"><div id="round-progress"></div></div>
+        <div id="game-content"></div>
+      </section>
+
+      <section id="result-screen" class="screen">
+        <div class="result-card">
+          <div class="result-medal" id="result-medal">🏆</div>
+          <div class="eyebrow">MISSION COMPLETE</div>
+          <h2 id="result-title">Well played!</h2>
+          <p id="result-message">You made progress.</p>
+          <div class="result-stats">
+            <div><strong id="result-score">0/0</strong><span>CORRECT</span></div>
+            <div><strong id="result-earned">+0</strong><span>XP EARNED</span></div>
+            <div><strong id="result-accuracy">0%</strong><span>ACCURACY</span></div>
+          </div>
+          <div class="result-actions"><button class="primary" id="play-again">PLAY AGAIN</button><button class="secondary" id="result-home">MISSION BOARD</button></div>
+          <div id="missed-review" class="missed-review"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>EMPIRE QUEST <span>·</span> Built for AP World History Unit 3 <span>·</span> Keep learning, keep conquering.</footer>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <dialog id="set-dialog" class="editor-dialog">
+    <form id="set-form">
+      <div class="dialog-heading"><div><span class="eyebrow">YOUR LIBRARY</span><h2>Create a study set</h2></div><button type="button" class="icon-close" data-close-dialog aria-label="Close">×</button></div>
+      <label>Set name<input id="set-name" maxlength="60" required placeholder="e.g. Chapter 4 Review"></label>
+      <label>Description<textarea id="set-description" maxlength="180" rows="2" placeholder="What are you studying?"></textarea></label>
+      <p class="section-note">Create the set first, then add as many questions as you need.</p>
+      <div class="dialog-actions"><button type="button" class="secondary" data-close-dialog>Cancel</button><button class="primary" type="submit">CREATE SET</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="question-dialog" class="editor-dialog">
+    <form id="question-form">
+      <div class="dialog-heading"><div><span class="eyebrow">BUILD YOUR SET</span><h2>Add a question</h2></div><button type="button" class="icon-close" data-close-dialog aria-label="Close">×</button></div>
+      <label>Question prompt<textarea id="question-prompt" rows="3" required maxlength="240"></textarea></label>
+      <label>Correct answer<input id="question-answer" maxlength="180" required></label>
+      <label>Wrong answer 1<input id="question-wrong-1" maxlength="180" required></label>
+      <label>Wrong answer 2<input id="question-wrong-2" maxlength="180" required></label>
+      <label>Wrong answer 3<input id="question-wrong-3" maxlength="180" required></label>
+      <label>Explanation<textarea id="question-explanation" rows="3" maxlength="500" required></textarea></label>
+      <div class="dialog-actions"><button type="button" class="secondary" data-close-dialog>Cancel</button><button type="submit" class="primary">SAVE QUESTION</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="import-dialog" class="editor-dialog">
+    <form id="import-form">
+      <div class="dialog-heading"><div><span class="eyebrow">AI OR GUIDE</span><h2>Import a guide</h2></div><button type="button" class="icon-close" data-close-dialog aria-label="Close">×</button></div>
+      <label>Set name<input id="import-name" maxlength="60" required placeholder="e.g. Chapter 6 Review"></label>
+      <label>Study guide file<input id="guide-file" type="file" accept=".txt,.md,.pdf,.docx" required></label>
+      <p class="section-note">Text-based files are supported. PDF/DOCX require the browser to read them from the file; if your file is scanned, OCR or a text export is needed first.</p>
+      <div id="import-status" class="section-note">Ready to read and build a study set.</div>
+      <div class="dialog-actions"><button type="button" class="secondary" data-close-dialog>Cancel</button><button type="submit" class="primary" id="generate-set">CREATE SET</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="question-list-dialog" class="editor-dialog">
+    <div class="dialog-heading"><div><span class="eyebrow">SET REVIEW</span><h2 id="question-list-title">Study set</h2></div><button type="button" class="icon-close" data-close-dialog aria-label="Close">×</button></div>
+    <div id="question-list" class="question-list"></div>
+    <div class="dialog-actions"><button type="button" class="secondary" id="list-add-question">ADD QUESTION</button></div>
+  </dialog>
+
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+    const STORAGE_KEY = 'empireQuestStudySets';
+    const PROGRESS_KEY = 'empireQuestStats';
+
+    const originalBank = [
+      ["Who captured Constantinople in 1453?","Mehmed II","Suleiman","Akbar","Babur","Mehmed II captured Constantinople, ending the Byzantine Empire. It became the Ottoman capital, Istanbul.","Ottoman Empire"],
+      ["What was the devshirme system?","Recruiting Christian boys from the Balkans for state service","A tax on non-Muslims","A treaty with Persia","A Protestant movement","The boys were converted to Islam and trained as soldiers or officials.","Ottoman Empire"],
+      ["Who were the Janissaries?","Elite Ottoman infantry","Safavid merchants","Mughal tax collectors","Catholic missionaries","Janissaries were elite soldiers recruited through the devshirme system and loyal to the sultan.","Ottoman Empire"],
+      ["What did the Ottoman millet system allow?","Religious communities to manage their own internal affairs","Every subject to avoid taxes","Only Muslims to govern","Princes to choose Lutheranism","The system let non-Muslim communities keep their religious leaders and manage internal affairs.","Ottoman Empire"],
+      ["What is tax farming?","Selling the right to collect taxes to private individuals","A tax paid only by farmers","A military recruitment system","A religious school system","Tax farmers collected taxes and kept a share, sending the rest to the state.","Ottoman Empire"],
+      ["Which ruler led the Ottoman Empire at its height?","Suleiman the Magnificent","Shah Abbas I","Aurangzeb","Martin Luther","Suleiman ruled from 1520 to 1566 and reformed laws while expanding Ottoman power.","Ottoman Empire"],
+      ["Who founded the Safavid Empire in 1501?","Shah Ismail I","Babur","Mehmed II","Henry VIII","Shah Ismail I founded the Safavid Empire and made Shi'a Islam its state religion.","Safavid Empire"],
+      ["The Safavid Empire followed which branch of Islam?","Shi'a","Sunni","Catholic","Protestant","The Safavids were Shi'a, unlike the Sunni Ottomans.","Safavid Empire"],
+      ["Who were the Qizilbash?","Turkic Shi'a warriors who supported Safavid shahs","Ottoman tax collectors","Mughal artists","English Protestants","The Qizilbash were important military supporters of the Safavid rulers.","Safavid Empire"],
+      ["What happened at the Battle of Chaldiran in 1514?","The Ottomans defeated the Safavids","The Safavids conquered India","The Mughals defeated the British","The Byzantine Empire returned","Ottoman cannons and musketeers defeated Safavid cavalry, showing the power of gunpowder weapons.","Safavid Empire"],
+      ["What is Shah Abbas I known for?","Modernizing the army and developing Isfahan","Capturing Constantinople","Starting the Reformation","Building the Taj Mahal","Abbas I ruled from 1588 to 1629 and strengthened the Safavid state.","Safavid Empire"],
+      ["Who founded the Mughal Empire in 1526?","Babur","Akbar","Aurangzeb","Shah Jahan","Babur founded the Mughal Empire after the Battle of Panipat.","Mughal Empire"],
+      ["Which Mughal ruler was known for religious tolerance?","Akbar","Aurangzeb","Babur","Shah Jahan","Akbar abolished the jizya and included Hindus in government to build loyalty.","Mughal Empire"],
+      ["What was the jizya?","A tax paid by non-Muslims in a Muslim state","A type of cannon","A Mughal palace","A Protestant pamphlet","Akbar abolished the tax, while Aurangzeb brought it back.","Mughal Empire"],
+      ["What were zamindars?","Local landowners who collected taxes for the Mughal state","Elite Ottoman soldiers","Safavid religious leaders","Jesuit missionaries","Zamindars collected taxes from peasants and kept a share.","Mughal Empire"],
+      ["Who built the Taj Mahal?","Shah Jahan","Akbar","Babur","Aurangzeb","The Taj Mahal was a tomb built under Shah Jahan and displayed Mughal wealth and power.","Mughal Empire"],
+      ["Which Mughal ruler restored the jizya and fought costly Deccan wars?","Aurangzeb","Akbar","Babur","Shah Jahan","Aurangzeb's strict policies and wars contributed to revolts and decline.","Mughal Empire"],
+      ["What was Din-i Ilahi?","Akbar's blended faith, which never spread widely","The Ottoman tax system","A Safavid army","The Anglican Church","It drew on Islam, Hinduism, and other beliefs.","Mughal Empire"],
+      ["Who posted the 95 Theses in 1517?","Martin Luther","John Calvin","Henry VIII","Ignatius of Loyola","Luther challenged Catholic Church practices, especially the sale of indulgences.","Reformation"],
+      ["What Church practice did Luther most directly criticize?","The sale of indulgences","The use of printing presses","The building of schools","The millet system","Luther argued that salvation could not be bought through indulgences.","Reformation"],
+      ["How did the printing press help Protestant ideas spread?","It made pamphlets and Bibles faster and cheaper to produce","It stopped people reading the Bible","It created the Ottoman army","It collected taxes","Printed materials helped ideas spread more quickly across Europe.","Reformation"],
+      ["What did John Calvin teach?","Predestination","The millet system","Tax farming","Shi'a Islam","Calvin taught that God had already determined who would be saved.","Reformation"],
+      ["Why did Henry VIII create the Anglican Church?","He wanted to break with Rome and control the English Church","He wanted to support Shah Ismail","He wanted to abolish all taxes","He wanted to start the Jesuits","His motives were mainly political and personal, including wanting an annulment.","Reformation"],
+      ["What was the Catholic Counter-Reformation?","The Catholic Church's effort to reform and respond to Protestantism","A Mughal tax policy","The Safavid conquest of Persia","The Ottoman capture of Vienna","Its goals included addressing abuses, reaffirming Catholic beliefs, and winning followers.","Catholic Reformation"],
+      ["What did the Council of Trent do?","Reaffirmed Catholic doctrine and addressed abuses","Created the Mughal Empire","Ended the Ottoman Empire","Made Shi'a Islam the state religion","It reaffirmed Catholic teachings, addressed abuses, and improved priest training.","Catholic Reformation"],
+      ["Who founded the Jesuits?","Ignatius of Loyola","Martin Luther","John Calvin","Mehmed II","The Jesuits focused on education and missionary work.","Catholic Reformation"],
+      ["What did the Peace of Augsburg (1555) allow?","Each German prince could choose Lutheranism or Catholicism for their territory","All Europe had to become Catholic","The Safavids could choose the Ottoman ruler","The Mughal emperor could choose Hinduism","It strengthened German princes and kept the Holy Roman Empire divided.","Catholic Reformation"],
+      ["What ended the Thirty Years' War in 1648?","The Peace of Westphalia","The Peace of Augsburg","The Battle of Chaldiran","The Treaty of Panipat","Westphalia ended the war and strengthened state sovereignty.","Catholic Reformation"],
+      ["Why are the Ottoman, Safavid, and Mughal states called gunpowder empires?","They used cannons and firearms to conquer territory and centralize power","They invented the printing press","They all followed Shi'a Islam","They refused to build armies","Gunpowder weapons gave their armies an advantage in expansion.","Comparison"],
+      ["Which statement correctly compares Ottoman and Mughal treatment of non-Muslims?","Both sometimes allowed religious practice, but Akbar abolished jizya while Ottomans retained it","Both forced everyone to convert","Neither collected taxes","The Mughals used the millet system exactly like the Ottomans","The Ottomans used millets and kept jizya; Akbar promoted tolerance and abolished jizya.","Comparison"],
+      ["What was one shared way all three empires legitimized their rule?","Religion and monumental architecture","Democracy and elections","Ending all taxes","Rejecting military power","Religious authority and impressive buildings displayed wealth, piety, and power.","Comparison"],
+      ["What was one similarity between Ottoman tax farming and Mughal zamindars?","Both used agents to collect taxes for the state","Both were elite infantry","Both spread Protestantism","Both abolished taxes","Local or private tax agents helped fund imperial rule and maintain order.","Comparison"]
+    ];
+
+    const defaultStudySet = {
+      id: 'default-unit-3',
+      name: 'Original Unit 3 Questions',
+      description: 'Built-in AP World history review set.',
+      questions: originalBank.map(q => ({
+        prompt: q[0],
+        answer: q[1],
+        wrongAnswers: [q[2], q[3], q[4]],
+        explanation: q[5],
+        topic: q[6]
+      }))
+    };
+
+    const studySets = [defaultStudySet];
+    const DEFAULT_SET_ID = 'default-unit-3';
+    let mode = 'quiz';
+    let questions = [];
+    let index = 0;
+    let correct = 0;
+    let earned = 0;
+    let missed = [];
+    let activeSetId = DEFAULT_SET_ID;
+    let timer = null;
+    let answered = false;
+    let stats = { xp: 0, streak: 0, best: 0 };
+    let flashcards = [];
+    let flashIndex = 0;
+    let flashKnown = 0;
+    let roomPlayers = [];
+    let roomCode = '';
+    let roomSocket = null;
+    let roomQuestions = [];
+    let roomRound = 0;
+    let roomCurrentQuestion = null;
+    let roomSetName = '';
+
+    function makeId() {
+      return 'set-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getStoredSets() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [defaultStudySet];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || !parsed.length) return [defaultStudySet];
+        return parsed;
+      } catch {
+        return [defaultStudySet];
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(stats));
+      updateProgressUI();
+    }
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(PROGRESS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          stats = { xp: Number(parsed.xp || 0), streak: Number(parsed.streak || 0), best: Number(parsed.best || 0) };
+        }
+      } catch {
+        stats = { xp: 0, streak: 0, best: 0 };
+      }
+      updateProgressUI();
+    }
+
+    function persistStudySets() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(studySets));
+    }
+
+    function updateProgressUI() {
+      $('#xp').textContent = stats.xp;
+      $('#streak').textContent = stats.streak;
+      $('#best').textContent = stats.best;
+      $('#progress-xp').textContent = `${stats.xp} XP`;
+      $('#rank-text').textContent = stats.xp < 100 ? 'Recruit · Keep training to rise through the ranks.' : stats.xp < 250 ? 'Scholar · Your knowledge is growing.' : 'History Legend · Empire mastery unlocked.';
+      $('#next-rank').textContent = `${Math.max(0, 100 - stats.xp)} XP to Scholar`;
+      const fill = Math.min((stats.xp / 100) * 100, 100);
+      $('#progress-fill').style.width = `${fill}%`;
+    }
+
+    function allStudySets() {
+      const custom = getStoredSets().filter(item => item && item.id && Array.isArray(item.questions));
+      return custom.length ? custom : [defaultStudySet];
+    }
+
+    function renderStudySets() {
+      const sets = allStudySets();
+      const select = $('#room-set');
+      if (select) {
+        select.innerHTML = sets.map(set => `<option value="${set.id}">${escapeHtml(set.name)}</option>`).join('');
+      }
+      const container = $('#study-sets');
+      if (!container) return;
+      container.innerHTML = sets.map(set => `
+        <article class="study-set-card">
+          <div class="set-card-top">
+            <span class="mode-icon">📚</span>
+            <button class="delete-set" data-delete-set="${set.id}" aria-label="Delete ${escapeHtml(set.name)}">×</button>
+          </div>
+          <h3>${escapeHtml(set.name)}</h3>
+          <p>${escapeHtml(set.description || 'Custom practice set.')}</p>
+          <div class="set-card-meta">${set.questions.length} questions</div>
+          <div class="set-card-actions">
+            <button class="primary" data-study-set="${set.id}">STUDY</button>
+            <button class="secondary" data-manage-set="${set.id}">MANAGE</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function toast(msg) {
+      const t = $('#toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1700);
+    }
+
+    function showScreen(id) {
+      $$('.screen').forEach(screen => screen.classList.toggle('active', screen.id === id));
+    }
+
+    function questionToTuple(q) {
+      return [q.prompt, q.answer, q.wrongAnswers[0], q.wrongAnswers[1], q.wrongAnswers[2], q.explanation, q.topic || 'Study set'];
+    }
+
+    function start(modeName, setId) {
+      mode = modeName;
+      index = 0;
+      correct = 0;
+      earned = 0;
+      missed = [];
+      answered = false;
+      activeSetId = setId || DEFAULT_SET_ID;
+      const selectedSet = allStudySets().find(s => s.id === activeSetId) || allStudySets()[0];
+      const setQuestions = selectedSet.questions.map(questionToTuple);
+      flashcards = selectedSet.questions.map(q => [q.prompt, q.explanation || q.answer]);
+      showScreen('game-screen');
+      $('#game-xp').textContent = '0';
+      $('#round-progress').style.width = '0%';
+      const titles = { campaign: 'Empire Campaign', quiz: 'Quick Battle', flashcards: 'Flashcard Forge', timeline: 'Timeline Rush', match: 'Match the Terms', boss: 'Final Boss' };
+      const kickers = { campaign: '7 TOPICS · YOUR HISTORY JOURNEY', quiz: 'RANDOM QUESTION BATTLE', flashcards: 'FLIP · LEARN · REMEMBER', timeline: 'PUT HISTORY IN ORDER', match: 'CONNECT THE CLUES', boss: 'FINAL UNIT CHALLENGE' };
+      $('#game-heading').textContent = setId ? selectedSet.name : titles[modeName];
+      $('#game-kicker').textContent = setId ? 'STUDY SET · ' + setQuestions.length + ' QUESTIONS' : kickers[modeName];
+      if (setId && !setQuestions.length) {
+        toast('Add at least one question before studying this set.');
+        showScreen('home-screen');
+        return;
+      }
+      if (modeName === 'flashcards') {
+        flashIndex = 0; flashKnown = 0; renderFlash(); return;
+      }
+      if (modeName === 'timeline') {
+        renderTimeline(); return;
+      }
+      if (modeName === 'match') {
+        renderMatch(); return;
+      }
+      const count = modeName === 'campaign' ? 10 : modeName === 'boss' ? 12 : 10;
+      let base = setQuestions;
+      if (modeName === 'campaign') base = shuffle(setQuestions).slice(0, count);
+      else base = shuffle(setQuestions).slice(0, count);
+      questions = base;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = questions[index];
+      if (!q) {
+        finish();
+        return;
+      }
+      answered = false;
+      $('#round-progress').style.width = `${(index / questions.length) * 100}%`;
+      const options = shuffle([q[1], q[2], q[3], q[4]]);
+      $('#game-content').innerHTML = `
+        <div class="question-card">
+          <div class="question-meta"><span>${escapeHtml(String(q[6] || 'Study set').toUpperCase())}</span><span>QUESTION ${index + 1} / ${questions.length}</span></div>
+          <h3>${escapeHtml(q[0])}</h3>
+          <div class="answers">
+            ${options.map((o, i) => `<button class="answer" data-answer="${escapeHtml(o)}"><span class="letter">${['A','B','C','D'][i]}</span>${escapeHtml(o)}</button>`).join('')}
+          </div>
+          <div class="feedback" id="feedback"></div>
+          <div class="next-row"><button class="primary" id="next-btn" disabled>${index === questions.length - 1 ? 'FINISH MISSION' : 'NEXT QUESTION →'}</button></div>
+        </div>
+      `;
+      $$('.answer').forEach(button => button.addEventListener('click', () => answerQuestion(button, q)));
+      $('#next-btn').addEventListener('click', () => {
+        if (index < questions.length - 1) { index++; renderQuestion(); } else { finish(); }
+      });
+    }
+
+    function answerQuestion(button, q) {
+      if (answered) return;
+      answered = true;
+      const isCorrect = button.dataset.answer === q[1];
+      const feedback = $('#feedback');
+      $$('.answer').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.answer === q[1]) b.classList.add('correct');
+      });
+      if (isCorrect) {
+        correct++; earned += 10; stats.streak++; stats.xp += 10; saveProgress();
+        feedback.className = 'feedback show';
+        feedback.innerHTML = `<b>✓ Correct! +10 XP</b><br>${escapeHtml(q[5])}`;
+        toast('+10 XP — nice work!');
+      } else {
+        stats.streak = 0;
+        missed.push(q);
+        button.classList.add('wrong');
+        feedback.className = 'feedback show bad';
+        feedback.innerHTML = `<b>Not quite — the answer is ${escapeHtml(q[1])}.</b><br>${escapeHtml(q[5])}`;
+      }
+      $('#game-xp').textContent = earned;
+      $('#next-btn').disabled = false;
+      saveProgress();
+    }
+
+    function finish() {
+      const accuracy = questions.length ? Math.round((correct / questions.length) * 100) : 0;
+      const medal = accuracy >= 80 ? '🏆' : accuracy >= 60 ? '🥈' : accuracy >= 40 ? '🥉' : '🎯';
+      $('#result-medal').textContent = medal;
+      $('#result-title').textContent = accuracy >= 80 ? 'Empire conquered!' : accuracy >= 60 ? 'Strong effort!' : accuracy >= 40 ? 'Good progress!' : 'Keep training!';
+      $('#result-message').textContent = `You answered ${correct} of ${questions.length} correctly.`;
+      $('#result-score').textContent = `${correct}/${questions.length}`;
+      $('#result-earned').textContent = `+${earned}`;
+      $('#result-accuracy').textContent = `${accuracy}%`;
+      $('#missed-review').innerHTML = missed.length
+        ? `<h4>Review these</h4>${missed.map(q => `<div><strong>${escapeHtml(q[0])}</strong><br><span>${escapeHtml(q[1])}</span></div>`).join('')}`
+        : '<p>Perfect round — no review needed.</p>';
+      showScreen('result-screen');
+      stats.best = Math.max(stats.best, correct);
+      saveProgress();
+    }
+
+    function renderFlash() {
+      const card = flashcards[flashIndex];
+      if (!card) return finish();
+      $('#round-progress').style.width = `${(flashIndex / Math.max(flashcards.length, 1)) * 100}%`;
+      $('#game-content').innerHTML = `
+        <div class="tool-card">
+          <div class="question-meta"><span>FLASHCARD FORGE</span><span>${flashIndex + 1} / ${flashcards.length}</span></div>
+          <div class="flashcard" id="flip-card">
+            <div>
+              <div class="face-label" id="face-label">TERM</div>
+              <h3 id="face-main">${escapeHtml(card[0])}</h3>
+              <p id="face-extra">Tap the card to reveal the definition.</p>
+            </div>
+          </div>
+          <div class="flash-controls">
+            <button class="secondary" id="prev-card" ${flashIndex === 0 ? 'disabled' : ''}>← BACK</button>
+            <span class="hint">Flip the card, then rate yourself</span>
+            <button class="primary" id="flip-next">FLIP CARD</button>
+          </div>
+          <div class="flash-controls" id="rate-row" style="display:none">
+            <button class="secondary" id="still-learning">STILL LEARNING</button>
+            <button class="primary" id="got-it">GOT IT ✓</button>
+          </div>
+        </div>
+      `;
+      let flipped = false;
+      $('#flip-card').addEventListener('click', () => {
+        if (flipped) return;
+        flipped = true;
+        $('#face-label').textContent = 'DEFINITION';
+        $('#face-main').textContent = card[0];
+        $('#face-extra').textContent = card[1];
+        $('#flip-next').style.display = 'none';
+        $('#rate-row').style.display = 'flex';
+      });
+      $('#flip-next').addEventListener('click', () => {
+        if (!flipped) {
+          flipped = true;
+          $('#face-label').textContent = 'DEFINITION';
+          $('#face-main').textContent = card[0];
+          $('#face-extra').textContent = card[1];
+          $('#flip-next').style.display = 'none';
+          $('#rate-row').style.display = 'flex';
+        }
+      });
+      $('#prev-card').addEventListener('click', () => {
+        if (flashIndex > 0) { flashIndex--; renderFlash(); }
+      });
+      $('#still-learning').addEventListener('click', () => advance(false));
+      $('#got-it').addEventListener('click', () => advance(true));
+      function advance(known) {
+        if (known) {
+          flashKnown++; stats.xp += 2; earned += 2; saveProgress();
+        }
+        if (flashIndex < flashcards.length - 1) {
+          flashIndex++; renderFlash();
+        } else {
+          showScreen('result-screen');
+          $('#result-medal').textContent = '🃏';
+          $('#result-title').textContent = 'Flashcard set complete!';
+          $('#result-message').textContent = `You knew ${flashKnown} out of ${flashcards.length} cards.`;
+          $('#result-score').textContent = `${flashKnown}/${flashcards.length}`;
+          $('#result-earned').textContent = `+${earned}`;
+          $('#result-accuracy').textContent = `${Math.round((flashKnown / Math.max(flashcards.length, 1)) * 100)}%`;
+          $('#missed-review').innerHTML = '<p>Review the cards you marked as still learning and try again.</p>';
+        }
+      }
+    }
+
+    function renderTimeline() {
+      const sample = shuffle(originalBank).slice(0, 6);
+      let selected = [];
+      $('#game-content').innerHTML = `
+        <div class="tool-card">
+          <div class="question-meta"><span>TIMELINE RUSH</span><span>6 EVENTS</span></div>
+          <h3>Put these events in chronological order, earliest to latest.</h3>
+          <div class="answers" id="timeline-list">
+            ${sample.map((item, i) => `<button class="answer" data-index="${i}"><span class="letter">${i + 1}</span>${escapeHtml(item[0])}</button>`).join('')}
+          </div>
+          <div class="feedback" id="timeline-feedback"></div>
+          <div class="next-row"><button class="primary" id="timeline-check" disabled>CHECK ORDER</button></div>
+        </div>
+      `;
+      const ordered = ['1453', '1517', '1526', '1648', '1750'];
+      $$('#timeline-list .answer').forEach(button => {
+        button.addEventListener('click', () => {
+          if (selected.includes(Number(button.dataset.index))) return;
+          selected.push(Number(button.dataset.index));
+          button.disabled = true;
+          $('#timeline-check').disabled = selected.length !== sample.length;
+        });
+      });
+      $('#timeline-check').addEventListener('click', () => {
+        const correctCount = selected.filter((idx, i) => idx === i).length;
+        const feedback = $('#timeline-feedback');
+        feedback.className = 'feedback show';
+        feedback.textContent = `You placed ${correctCount} of 6 in the correct order.`;
+        stats.xp += correctCount * 5; stats.best = Math.max(stats.best, correctCount); saveProgress();
+        $('#timeline-check').textContent = 'FINISH';
+        $('#timeline-check').addEventListener('click', () => finish(), { once: true });
+      });
+    }
+
+    function renderMatch() {
+      const pairs = shuffle(originalBank).slice(0, 4); 
+      const left = pairs.map((p, i) => ({ id: i, text: p[0] }));
+      const right = pairs.map((p, i) => ({ id: i, text: p[1] }));
+      let selectedLeft = null;
+      let matched = 0;
+      $('#game-content').innerHTML = `
+        <div class="tool-card">
+          <div class="question-meta"><span>MATCH THE TERMS</span><span>${matched} / ${pairs.length} MATCHED</span></div>
+          <h3>Choose a term and then match it to the correct answer.</h3>
+          <div class="answers">
+            <div class="pair-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div>${left.map(item => `<button class="answer" data-side="left" data-id="${item.id}">${escapeHtml(item.text)}</button>`).join('')}</div>
+              <div>${right.map(item => `<button class="answer" data-side="right" data-id="${item.id}">${escapeHtml(item.text)}</button>`).join('')}</div>
+            </div>
+          </div>
+          <div class="feedback" id="match-feedback"></div>
+        </div>
+      `;
+      $$('.answer[data-side="left"]').forEach(button => {
+        button.addEventListener('click', () => {
+          selectedLeft = Number(button.dataset.id);
+          $$('.answer[data-side="left"]').forEach(b => b.classList.remove('correct'));
+          button.classList.add('correct');
+          const feed = $('#match-feedback');
+          feed.className = 'feedback show';
+          feed.textContent = 'Now choose the matching answer from the right column.';
+        });
+      });
+      $$('.answer[data-side="right"]').forEach(button => {
+        button.addEventListener('click', () => {
+          const rightId = Number(button.dataset.id);
+          if (selectedLeft === null) return;
+          if (selectedLeft === rightId) {
+            matched++;
+            stats.xp += 10; stats.best = Math.max(stats.best, matched); saveProgress();
+            button.classList.add('correct');
+            $(`.answer[data-side="left"][data-id="${selectedLeft}"]`).classList.add('correct');
+            $('#match-feedback').textContent = 'Correct match!';
+            selectedLeft = null;
+            if (matched >= pairs.length) {
+              setTimeout(() => finish(), 600);
+            }
+          } else {
+            $('#match-feedback').className = 'feedback show bad';
+            $('#match-feedback').textContent = 'Not quite — try another pair.';
+          }
+        });
+      });
+    }
+
+    function roomStatus(message, isError = false) {
+      const status = $('#room-status');
+      if (!status) return;
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
+    function renderRoomLobby() {
+      const lobby = $('#room-lobby');
+      if (!lobby) return;
+      const roster = roomPlayers.map(player => `<li>${escapeHtml(player.name)}${player.host ? ' <span class="host-badge">HOST</span>' : ''}<b>${player.score || 0} pts</b></li>`).join('');
+      lobby.hidden = false;
+      lobby.innerHTML = `
+        <div class="room-heading">
+          <div><span class="eyebrow">ROOM</span><h3>Room ${escapeHtml(roomCode)}</h3></div>
+          <div class="room-actions"><button class="secondary" id="room-leave">LEAVE ROOM</button></div>
+        </div>
+        <h4>Players (${roomPlayers.length})</h4>
+        <ul class="player-list">${roster}</ul>
+      `;
+      $('#room-leave').addEventListener('click', () => {
+        if (roomSocket && roomSocket.readyState === WebSocket.OPEN) roomSocket.close();
+      });
+    }
+
+    function connectRoom(modeName) {
+      const name = $('#player-name').value.trim();
+      if (!name) {
+        roomStatus('Enter your player name first.', true);
+        return;
+      }
+      const socketUrl = 'ws://localhost:8787';
+      try {
+        roomSocket = new WebSocket(socketUrl);
+      } catch (error) {
+        roomStatus(`Could not connect: ${error.message}`, true);
+        return;
+      }
+      roomSocket.onopen = () => {
+        roomStatus('Connected to room server.');
+        roomSocket.send(JSON.stringify({ type: modeName === 'host' ? 'create' : 'join', name, code: $('#join-code').value.trim().toUpperCase() }));
+      };
+      roomSocket.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'joined') {
+            roomCode = msg.code;
+            roomPlayers = msg.players || [];
+            roomStatus(`Connected to room ${roomCode}.`);
+            renderRoomLobby();
+          }
+          if (msg.type === 'players') {
+            roomPlayers = msg.players || [];
+            renderRoomLobby();
+          }
+          if (msg.type === 'error') {
+            roomStatus(msg.message || 'Room error.', true);
+          }
+        } catch {
+          roomStatus('Received invalid room data.', true);
+        }
+      };
+      roomSocket.onclose = () => {
+        roomStatus('Disconnected from room server.');
+      };
+    }
+
+    function bindEvents() {
+      $('#start-btn').addEventListener('click', () => start('quiz', DEFAULT_SET_ID));
+      $('#back-home').addEventListener('click', () => showScreen('home-screen'));
+      $('#play-again').addEventListener('click', () => start(mode, activeSetId));
+      $('#result-home').addEventListener('click', () => showScreen('home-screen'));
+      document.querySelectorAll('.mode-card').forEach(button => {
+        button.addEventListener('click', () => start(button.dataset.mode, DEFAULT_SET_ID));
+      });
+      $('#create-set-btn').addEventListener('click', () => $('#set-dialog').showModal());
+      $('#import-set-btn').addEventListener('click', () => $('#import-dialog').showModal());
+      $$('[data-close-dialog]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
+      $('#set-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const name = $('#set-name').value.trim();
+        if (!name) return;
+        const set = { id: makeId(), name, description: $('#set-description').value.trim(), questions: [] };
+        const all = allStudySets();
+        all.push(set);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+        renderStudySets();
+        $('#set-form').reset();
+        $('#set-dialog').close();
+        editingSetId = set.id; editingQuestionIndex = null;
+        $('#question-form').reset();
+        $('#question-dialog').showModal();
+      });
+      $('#study-sets').addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        if (button.dataset.studySet) return start('quiz', button.dataset.studySet);
+        if (button.dataset.manageSet) openQuestionList(button.dataset.manageSet);
+        if (button.dataset.deleteSet) {
+          const set = allStudySets().find(item => item.id === button.dataset.deleteSet);
+          if (set && window.confirm(`Delete "${set.name}" and its questions?`)) {
+            const next = allStudySets().filter(item => item.id !== set.id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+            renderStudySets();
+          }
+        }
+      });
+      $('#host-room').addEventListener('click', () => connectRoom('host'));
+      $('#join-room').addEventListener('click', () => connectRoom('join'));
+      $('#import-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const file = $('#guide-file').files[0];
+        const name = $('#import-name').value.trim();
+        if (!file || !name) return;
+        const status = $('#import-status');
+        status.textContent = 'Reading your study guide…';
+        try {
+          const text = await file.text();
+          const cleaned = text.replace(/\s+/g, ' ').trim();
+          if (cleaned.length < 100) throw new Error('Not enough readable text was found.');
+          const generated = [];
+          const sentences = cleaned.split(/(?<=[.!?])\s+/).filter(Boolean).slice(0, 8);
+          sentences.forEach((sentence, index) => {
+            generated.push({
+              prompt: `Question ${index + 1}: ${sentence.slice(0, 110)}`,
+              answer: index % 2 === 0 ? 'Evidence-based answer' : 'Correct interpretation',
+              wrongAnswers: ['Alternative claim', 'Misreading', 'False conclusion'],
+              explanation: 'This idea is supported by the source material and should be reviewed before studying.',
+              topic: name
+            });
+          });
+          const set = { id: makeId(), name, description: `AI-generated from ${file.name}. Review answers before studying.`, questions: generated };
+          const all = allStudySets();
+          all.push(set);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+          renderStudySets();
+          $('#import-form').reset();
+          $('#import-dialog').close();
+          openQuestionList(set.id);
+          toast(`Created "${name}" with ${generated.length} questions.`);
+        } catch (error) {
+          status.textContent = error.message || 'Could not analyze this guide.';
+        }
+      });
+    }
+
+    let editingSetId = DEFAULT_SET_ID;
+    let editingQuestionIndex = null;
+
+    function openQuestionList(setId) {
+      editingSetId = setId;
+      const set = allStudySets().find(item => item.id === setId);
+      if (!set) return;
+      $('#question-list-title').textContent = set.name;
+      renderQuestionList(set);
+      $('#question-list-dialog').showModal();
+    }
+
+    function renderQuestionList(set) {
+      $('#question-list').innerHTML = set.questions.length
+        ? set.questions.map((question, index) => `
+            <article class="question-list-item">
+              <h3>${index + 1}. ${escapeHtml(question.prompt)}</h3>
+              <p>Answer: ${escapeHtml(question.answer)}</p>
+              <div class="room-actions">
+                <button class="secondary" data-edit-question="${index}">EDIT</button>
+                <button class="delete-set" data-remove-question="${index}" aria-label="Delete question ${index + 1}">×</button>
+              </div>
+            </article>
+          `).join('')
+        : '<p class="section-note">This set has no questions yet. Add one to start studying.</p>';
+    }
+
+    $('#question-list').addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button) return;
+      const set = allStudySets().find(item => item.id === editingSetId);
+      if (!set) return;
+      if (button.dataset.editQuestion !== undefined) {
+        editingQuestionIndex = Number(button.dataset.editQuestion);
+        const question = set.questions[editingQuestionIndex];
+        if (!question) return;
+        $('#question-prompt').value = question.prompt;
+        $('#question-answer').value = question.answer;
+        $('#question-wrong-1').value = question.wrongAnswers[0] || '';
+        $('#question-wrong-2').value = question.wrongAnswers[1] || '';
+        $('#question-wrong-3').value = question.wrongAnswers[2] || '';
+        $('#question-explanation').value = question.explanation || '';
+        $('#question-list-dialog').close();
+        $('#question-dialog').showModal();
+        return;
+      }
+      if (button.dataset.removeQuestion !== undefined) {
+        const index = Number(button.dataset.removeQuestion);
+        if (window.confirm('Delete this question?')) {
+          set.questions.splice(index, 1);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(allStudySets()));
+          renderStudySets();
+          renderQuestionList(set);
+        }
+      }
+    });
+
+    $('#list-add-question').addEventListener('click', () => {
+      editingQuestionIndex = null;
+      $('#question-form').reset();
+      $('#question-list-dialog').close();
+      $('#question-dialog').showModal();
+    });
+
+    $('#question-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const set = allStudySets().find(item => item.id === editingSetId);
+      if (!set) return;
+      const wrongAnswers = [1, 2, 3].map(i => $(`#question-wrong-${i}`).value.trim());
+      const answer = $('#question-answer').value.trim();
+      const prompt = $('#question-prompt').value.trim();
+      const explanation = $('#question-explanation').value.trim();
+      if (!prompt || !answer || wrongAnswers.some(v => !v) || !explanation) return;
+      const choices = [answer, ...wrongAnswers].map(value => value.toLocaleLowerCase());
+      if (new Set(choices).size !== choices.length) {
+        toast('Each answer choice must be different.');
+        return;
+      }
+      const question = { prompt, answer, wrongAnswers, explanation, topic: set.name };
+      if (editingQuestionIndex === null) set.questions.push(question);
+      else set.questions[editingQuestionIndex] = question;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allStudySets()));
+      renderStudySets();
+      $('#question-form').reset();
+      $('#question-dialog').close();
+      openQuestionList(set.id);
+      toast(editingQuestionIndex === null ? 'Question added to your set.' : 'Question updated.');
+      editingQuestionIndex = null;
+    });
+
+    function init() {
+      const sets = getStoredSets();
+      if (!sets.length) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([defaultStudySet]));
+      }
+      loadProgress();
+      renderStudySets();
+      bindEvents();
+      $('#room-set').innerHTML = allStudySets().map(set => `<option value="${set.id}">${escapeHtml(set.name)}</option>`).join('');
+    }
+
+    init();
+  </script>
+</body>
+</html>
